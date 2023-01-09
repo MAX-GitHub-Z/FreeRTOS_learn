@@ -37,29 +37,11 @@
  * 这个句柄可以为 NULL。
  */
 /*创建任务句柄*/
-static TaskHandle_t AppTaskCreate_Handle;
-/*LED任务句柄*/
-static TaskHandle_t LED_Task_Handle;
-/********************************全局变量声明********************************/
-
-/*AppTaskCreate任务堆栈*/
-static StackType_t AppTaskCreate_Stack[128];
-/*LED任务堆栈*/
-static StackType_t LED_Task_Stack[128];
-
-/*AppTaskCreate任务控制块*/
-static StaticTask_t AppTaskCreate_TCB;
-/*LED任务控制块*/
-static StaticTask_t LED_Task_TCB;
-
-/*空闲任务堆栈*/
-static StackType_t Idle_Task_Stack[configMINIMAL_STACK_SIZE];
-/*定时器任务堆栈*/
-static StackType_t Timer_Task_Stack[configTIMER_TASK_STACK_DEPTH];
-/*空闲任务控制块*/
-static StaticTask_t Idle_Task_TCB;
-/*定时器任务控制块*/
-static StaticTask_t Timer_Task_TCB;
+static TaskHandle_t AppTaskCreate_Handle=NULL;
+/*LED1任务句柄*/
+static TaskHandle_t LED1_Task_Handle=NULL;
+/*LED1任务句柄*/
+static TaskHandle_t LED2_Task_Handle=NULL;
 
 
 
@@ -80,56 +62,44 @@ void BSP_init()
 /*
 ***********************************************************
  * 定义一个LED闪烁的任务
- * LED_TASK
+ * LED1_TASK
  * LED每500ms翻转一次状态
  * 无返回值
  * ********************************************************
  * */
 
-static void LED_Task(void* parameter)
+static void LED1_Task(void* parameter)
 {
   while(1)
   {
-    printf("LED_ON!\r\n");
+    printf("LED1_ON!\r\n");
     LED1_ON;
     vTaskDelay(500);/*延时500个tick*/
-    printf("LED_OFF!\r\n");
+    printf("LED1_OFF!\r\n");
     LED1_OFF;
     vTaskDelay(500);
   }
 }
+/*
+***********************************************************
+ * 定义一个LED闪烁的任务
+ * LED2_TASK
+ * LED每1s翻转一次状态
+ * 无返回值
+ * ********************************************************
+ * */
 
-
-/**
- *************************************************************
- * 获取空闲任务的任务堆栈和任务控制块内存
- * ppxIdleTaskTCBBuffer     :任务块内存
- * ppxIDleTaskStackBuffer   ：任务堆栈内存
- * pulIdleTaskStackSize     ：任务堆栈大小
- * @return viod 
- */
-void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
-                                   StackType_t **ppxIDleTaskStackBuffer,
-                                   uint32_t *pulIdleTaskStackSize)
+static void LED2_Task(void* parameter)
 {
-  *ppxIdleTaskTCBBuffer=&Idle_Task_TCB;/*任务控制块内存*/
-  *ppxIDleTaskStackBuffer=Idle_Task_Stack;/*任务堆栈内存*/
-  *pulIdleTaskStackSize=configMINIMAL_STACK_SIZE;/*任务堆栈大小*/
-}
-/**
- * @brief 获取定时器任务的任务堆栈和任务控制块内存
- * ppxTimerTaskTCBBuffer    ：任务控制块内存
- * ppxTimerTaskStackBuffer  ：任务堆栈内存
- * pulTimerTaskStackSize    ：任务堆栈大小
- * @return void 
- */
-void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
-                                    StackType_t **ppxTimerTaskStackBuffer,
-                                    uint32_t *pulTimerTaskStackSize)
-{
-  *ppxTimerTaskTCBBuffer=&Timer_Task_TCB;/* 任务控制块内存 */
-  *ppxTimerTaskStackBuffer=Timer_Task_Stack;/* 任务堆栈内存 */
-  *pulTimerTaskStackSize=configTIMER_TASK_STACK_DEPTH;/* 任务堆栈大小 */
+  while(1)
+  {
+    printf("LED2_ON!\r\n");
+    LED2_ON;
+    vTaskDelay(1000);/*延时500个tick*/
+    printf("LED2_OFF!\r\n");
+    LED2_OFF;
+    vTaskDelay(1000);
+  }
 }
 
 /**
@@ -138,38 +108,52 @@ void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
  */
 static void AppTaskCreate(void)
 {
+  BaseType_t xReturn = pdPASS;//定义一个创建信息返回值，
   taskENTER_CRITICAL();//进入临界区
-  LED_Task_Handle=xTaskCreateStatic((TaskFunction_t )LED_Task,//任务函数
-                                    (const char*)"LED_Task",//
-                                    (uint32_t   )128,//
-                                    (void*      )NULL,//传递给任务的参数
-                                    (UBaseType_t)4,//任务优先级
-                                    (StackType_t*)LED_Task_Stack,//任务堆栈
-                                    (StaticTask_t*)&LED_Task_TCB);//任务控制块
-  if(NULL!=LED_Task_Handle)
-    printf("LED_Task_Handle任务创建成功\r\n");
+  /*创建LED1_Task任务*/
+  xReturn=xTaskCreate((TaskFunction_t )LED1_Task,//任务函数
+                      (const char*)"LED1_Task",//
+                      (uint32_t   )512,//
+                      (void*      )NULL,//传递给任务的参数
+                      (UBaseType_t)2,//任务优先级
+                      (TaskHandle_t*)&LED1_Task_Handle);//任务控制块
+  if(pdPASS==xReturn)
+    printf("LED1_Task任务创建成功\r\n");
   else
-    printf("LED_Task_Handle任务创建失败\r\n");
-  
+    printf("LED1_Task任务创建失败\r\n");
+    /*创建LED2_Task任务*/
+  xReturn=xTaskCreate((TaskFunction_t )LED2_Task,//任务函数
+                      (const char*)"LED2_Task",//
+                      (uint32_t   )512,//
+                      (void*      )NULL,//传递给任务的参数
+                      (UBaseType_t)3,//任务优先级
+                      (TaskHandle_t*)&LED2_Task_Handle);//任务控制块
+  if(pdPASS==xReturn)
+    printf("LED2_Task任务创建成功\r\n");
+  else
+    printf("LED2_Task任务创建失败\r\n");
+
+
   vTaskDelete(AppTaskCreate_Handle);//删除AppTaskCreate_Handle任务
   taskEXIT_CRITICAL();//退出临界区
 
 }
 int main(void)
 {	
+  BaseType_t xReturn =pdPASS; //定义一个创建信息的返回值，默认为pdPASS
   BSP_init();/*开发板硬件初始化*/
-  printf("这是一个基于STM32F103的FreeRTOS系统的静态创建任务的测试!\r\n");
+  printf("这是一个基于STM32F103的FreeRTOS系统的动态多任务创建的测试!\r\n");
   /*创建AppTaskCreate任务*/
-  AppTaskCreate_Handle=xTaskCreateStatic((TaskFunction_t)AppTaskCreate,
+ xReturn = xTaskCreate((TaskFunction_t)AppTaskCreate,
                                       (const char*   )"AppTaskCreate",//任务名称
-                                      (uint32_t      )128,//任务堆栈大小
+                                      (uint32_t      )512,//任务堆栈大小
                                       (void*         )NULL,//传递给任务函数的参数
-                                      (UBaseType_t   )3,//任务优先级
-                                      (StackType_t*  )AppTaskCreate_Stack,
-                                      (StaticTask_t*)&AppTaskCreate_TCB);  
-if(NULL!=AppTaskCreate_Handle)/*创建成功*/
+                                      (UBaseType_t   )1,//任务优先级
+                                      (TaskHandle_t*  )&AppTaskCreate_Handle);  
+if(NULL!=xReturn)/*创建成功*/
     vTaskStartScheduler();/*启动任务，开启调度*/
-
+else
+   return 1;
 
 
 while(1);
