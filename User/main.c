@@ -4,85 +4,85 @@
   * @author  fire
   * @version V1.0
   * @date    2018-xx-xx
-  * @brief   FreeRTOS v9.0.0 + STM32 å·¥ç¨‹æ¨¡ç‰ˆ
+  * @brief   FreeRTOS v9.0.0 + STM32 ¹¤³ÌÄ£°æ
   *********************************************************************
   * @attention
   *
-  * å®éªŒå¹³å°:é‡ç« STM32å…¨ç³»åˆ—å¼€å‘æ¿ 
-  * è®ºå›    :http://www.firebbs.cn
-  * æ·˜å®    :https://fire-stm32.taobao.com
+  * ÊµÑéÆ½Ì¨:Ò°»ğ STM32È«ÏµÁĞ¿ª·¢°å 
+  * ÂÛÌ³    :http://www.firebbs.cn
+  * ÌÔ±¦    :https://fire-stm32.taobao.com
   *
   **********************************************************************
   */ 
  
 /*
 *************************************************************************
-*                             åŒ…å«çš„å¤´æ–‡ä»¶
+*                             °üº¬µÄÍ·ÎÄ¼ş
 *************************************************************************
 */ 
-/* FreeRTOSå¤´æ–‡ä»¶ */
+/* FreeRTOSÍ·ÎÄ¼ş */
 #include "FreeRTOS.h"
 #include "task.h"
 
 
-/* å¼€å‘æ¿ç¡¬ä»¶bspå¤´æ–‡ä»¶ */
+/* ¿ª·¢°åÓ²¼şbspÍ·ÎÄ¼ş */
 #include "bsp_led.h"
 #include "bsp_usart.h"
 
 
-/**************************** ä»»åŠ¡å¥æŸ„ ********************************/
+/**************************** ÈÎÎñ¾ä±ú ********************************/
  /*
- * ä»»åŠ¡å¥æŸ„æ˜¯ä¸€ä¸ªæŒ‡é’ˆï¼Œç”¨äºæŒ‡å‘ä¸€ä¸ªä»»åŠ¡ï¼Œå½“ä»»åŠ¡åˆ›å»ºå¥½ä¹‹åï¼Œå®ƒå°±å…·æœ‰äº†ä¸€ä¸ªä»»åŠ¡å¥æŸ„
- * ä»¥åæˆ‘ä»¬è¦æƒ³æ“ä½œè¿™ä¸ªä»»åŠ¡éƒ½éœ€è¦é€šè¿‡è¿™ä¸ªä»»åŠ¡å¥æŸ„ï¼Œå¦‚æœæ˜¯è‡ªèº«çš„ä»»åŠ¡æ“ä½œè‡ªå·±ï¼Œé‚£ä¹ˆ
- * è¿™ä¸ªå¥æŸ„å¯ä»¥ä¸º NULLã€‚
+ * ÈÎÎñ¾ä±úÊÇÒ»¸öÖ¸Õë£¬ÓÃÓÚÖ¸ÏòÒ»¸öÈÎÎñ£¬µ±ÈÎÎñ´´½¨ºÃÖ®ºó£¬Ëü¾Í¾ßÓĞÁËÒ»¸öÈÎÎñ¾ä±ú
+ * ÒÔºóÎÒÃÇÒªÏë²Ù×÷Õâ¸öÈÎÎñ¶¼ĞèÒªÍ¨¹ıÕâ¸öÈÎÎñ¾ä±ú£¬Èç¹ûÊÇ×ÔÉíµÄÈÎÎñ²Ù×÷×Ô¼º£¬ÄÇÃ´
+ * Õâ¸ö¾ä±ú¿ÉÒÔÎª NULL¡£
  */
-/*åˆ›å»ºä»»åŠ¡å¥æŸ„*/
+/*´´½¨ÈÎÎñ¾ä±ú*/
 static TaskHandle_t AppTaskCreate_Handle;
-/*LEDä»»åŠ¡å¥æŸ„*/
+/*LEDÈÎÎñ¾ä±ú*/
 static TaskHandle_t LED_Task_Handle;
-/********************************å…¨å±€å˜é‡å£°æ˜********************************/
+/********************************È«¾Ö±äÁ¿ÉùÃ÷********************************/
 
-/*AppTaskCreateä»»åŠ¡å †æ ˆ*/
+/*AppTaskCreateÈÎÎñ¶ÑÕ»*/
 static StackType_t AppTaskCreate_Stack[128];
-/*LEDä»»åŠ¡å †æ ˆ*/
+/*LEDÈÎÎñ¶ÑÕ»*/
 static StackType_t LED_Task_Stack[128];
 
-/*AppTaskCreateä»»åŠ¡æ§åˆ¶å—*/
+/*AppTaskCreateÈÎÎñ¿ØÖÆ¿é*/
 static StaticTask_t AppTaskCreate_TCB;
-/*LEDä»»åŠ¡æ§åˆ¶å—*/
+/*LEDÈÎÎñ¿ØÖÆ¿é*/
 static StaticTask_t LED_Task_TCB;
 
-/*ç©ºé—²ä»»åŠ¡å †æ ˆ*/
+/*¿ÕÏĞÈÎÎñ¶ÑÕ»*/
 static StackType_t Idle_Task_Stack[configMINIMAL_STACK_SIZE];
-/*å®šæ—¶å™¨ä»»åŠ¡å †æ ˆ*/
+/*¶¨Ê±Æ÷ÈÎÎñ¶ÑÕ»*/
 static StackType_t Timer_Task_Stack[configTIMER_TASK_STACK_DEPTH];
-/*ç©ºé—²ä»»åŠ¡æ§åˆ¶å—*/
+/*¿ÕÏĞÈÎÎñ¿ØÖÆ¿é*/
 static StaticTask_t Idle_Task_TCB;
-/*å®šæ—¶å™¨ä»»åŠ¡æ§åˆ¶å—*/
+/*¶¨Ê±Æ÷ÈÎÎñ¿ØÖÆ¿é*/
 static StaticTask_t Timer_Task_TCB;
 
 
 
 /*
 ***************************************************************
- * ç¡¬ä»¶åˆå§‹åŒ–
+ * Ó²¼ş³õÊ¼»¯
  * BSP_init
- * æ¿å­ä¸Šçš„æ‰€æœ‰ç¡¬ä»¶åˆå§‹åŒ–åº”è¯¥æ”¾åˆ°è¿™ä¸ªå‡½æ•°é‡Œé¢
- * æ— è¿”å›å€¼
+ * °å×ÓÉÏµÄËùÓĞÓ²¼ş³õÊ¼»¯Ó¦¸Ã·Åµ½Õâ¸öº¯ÊıÀïÃæ
+ * ÎŞ·µ»ØÖµ
  * *************************************************************
  * */
 void BSP_init()
 {
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);//STM32ä¸­æ–­ä¼˜å…ˆçº§åˆ†ç»„ä¸º4
- LED_GPIO_Config(); //LEDç«¯å£åˆå§‹åŒ–
- USART_Config(); //USARTä¸²å£åˆå§‹åŒ–
+  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);//STM32ÖĞ¶ÏÓÅÏÈ¼¶·Ö×éÎª4
+ LED_GPIO_Config(); //LED¶Ë¿Ú³õÊ¼»¯
+ USART_Config(); //USART´®¿Ú³õÊ¼»¯
 }
 /*
 ***********************************************************
- * å®šä¹‰ä¸€ä¸ªLEDé—ªçƒçš„ä»»åŠ¡
+ * ¶¨ÒåÒ»¸öLEDÉÁË¸µÄÈÎÎñ
  * LED_TASK
- * LEDæ¯500msç¿»è½¬ä¸€æ¬¡çŠ¶æ€
- * æ— è¿”å›å€¼
+ * LEDÃ¿500ms·­×ªÒ»´Î×´Ì¬
+ * ÎŞ·µ»ØÖµ
  * ********************************************************
  * */
 
@@ -90,8 +90,10 @@ static void LED_Task(void* parameter)
 {
   while(1)
   {
+    printf("LED_ON!\r\n");
     LED1_ON;
-    vTaskDelay(500);/*å»¶æ—¶500ä¸ªtick*/
+    vTaskDelay(500);/*ÑÓÊ±500¸ötick*/
+    printf("LED_OFF!\r\n");
     LED1_OFF;
     vTaskDelay(500);
   }
@@ -100,73 +102,73 @@ static void LED_Task(void* parameter)
 
 /**
  *************************************************************
- * è·å–ç©ºé—²ä»»åŠ¡çš„ä»»åŠ¡å †æ ˆå’Œä»»åŠ¡æ§åˆ¶å—å†…å­˜
- * ppxIdleTaskTCBBuffer     :ä»»åŠ¡å—å†…å­˜
- * ppxIDleTaskStackBuffer   ï¼šä»»åŠ¡å †æ ˆå†…å­˜
- * pulIdleTaskStackSize     ï¼šä»»åŠ¡å †æ ˆå¤§å°
+ * »ñÈ¡¿ÕÏĞÈÎÎñµÄÈÎÎñ¶ÑÕ»ºÍÈÎÎñ¿ØÖÆ¿éÄÚ´æ
+ * ppxIdleTaskTCBBuffer     :ÈÎÎñ¿éÄÚ´æ
+ * ppxIDleTaskStackBuffer   £ºÈÎÎñ¶ÑÕ»ÄÚ´æ
+ * pulIdleTaskStackSize     £ºÈÎÎñ¶ÑÕ»´óĞ¡
  * @return viod 
  */
 void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
                                    StackType_t **ppxIDleTaskStackBuffer,
                                    uint32_t *pulIdleTaskStackSize)
 {
-  *ppxIdleTaskTCBBuffer=&Idle_Task_TCB;/*ä»»åŠ¡æ§åˆ¶å—å†…å­˜*/
-  *ppxIDleTaskStackBuffer=Idle_Task_Stack;/*ä»»åŠ¡å †æ ˆå†…å­˜*/
-  *pulIdleTaskStackSize=configMINIMAL_STACK_SIZE;/*ä»»åŠ¡å †æ ˆå¤§å°*/
+  *ppxIdleTaskTCBBuffer=&Idle_Task_TCB;/*ÈÎÎñ¿ØÖÆ¿éÄÚ´æ*/
+  *ppxIDleTaskStackBuffer=Idle_Task_Stack;/*ÈÎÎñ¶ÑÕ»ÄÚ´æ*/
+  *pulIdleTaskStackSize=configMINIMAL_STACK_SIZE;/*ÈÎÎñ¶ÑÕ»´óĞ¡*/
 }
 /**
- * @brief è·å–å®šæ—¶å™¨ä»»åŠ¡çš„ä»»åŠ¡å †æ ˆå’Œä»»åŠ¡æ§åˆ¶å—å†…å­˜
- * ppxTimerTaskTCBBuffer    ï¼šä»»åŠ¡æ§åˆ¶å—å†…å­˜
- * ppxTimerTaskStackBuffer  ï¼šä»»åŠ¡å †æ ˆå†…å­˜
- * pulTimerTaskStackSize    ï¼šä»»åŠ¡å †æ ˆå¤§å°
+ * @brief »ñÈ¡¶¨Ê±Æ÷ÈÎÎñµÄÈÎÎñ¶ÑÕ»ºÍÈÎÎñ¿ØÖÆ¿éÄÚ´æ
+ * ppxTimerTaskTCBBuffer    £ºÈÎÎñ¿ØÖÆ¿éÄÚ´æ
+ * ppxTimerTaskStackBuffer  £ºÈÎÎñ¶ÑÕ»ÄÚ´æ
+ * pulTimerTaskStackSize    £ºÈÎÎñ¶ÑÕ»´óĞ¡
  * @return void 
  */
 void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
                                     StackType_t **ppxTimerTaskStackBuffer,
                                     uint32_t *pulTimerTaskStackSize)
 {
-  *ppxTimerTaskTCBBuffer=&Timer_Task_TCB;/* ä»»åŠ¡æ§åˆ¶å—å†…å­˜ */
-  *ppxTimerTaskStackBuffer=Timer_Task_Stack;/* ä»»åŠ¡å †æ ˆå†…å­˜ */
-  *pulTimerTaskStackSize=configTIMER_TASK_STACK_DEPTH;/* ä»»åŠ¡å †æ ˆå¤§å° */
+  *ppxTimerTaskTCBBuffer=&Timer_Task_TCB;/* ÈÎÎñ¿ØÖÆ¿éÄÚ´æ */
+  *ppxTimerTaskStackBuffer=Timer_Task_Stack;/* ÈÎÎñ¶ÑÕ»ÄÚ´æ */
+  *pulTimerTaskStackSize=configTIMER_TASK_STACK_DEPTH;/* ÈÎÎñ¶ÑÕ»´óĞ¡ */
 }
 
 /**
- * @brief ä¸ºäº†æ–¹ä¾¿ç®¡ç†ï¼Œä¸€èˆ¬æ‰€æœ‰ä»»åŠ¡åˆ›å»ºå‡½æ•°éƒ½æ”¾åœ¨è¿™é‡Œ
+ * @brief ÎªÁË·½±ã¹ÜÀí£¬Ò»°ãËùÓĞÈÎÎñ´´½¨º¯Êı¶¼·ÅÔÚÕâÀï
  * 
  */
 static void AppTaskCreate(void)
 {
-  taskENTER_CRITICAL();//è¿›å…¥ä¸´ç•ŒåŒº
-  LED_Task_Handle=xTaskCreateStatic((TaskFunction_t )LED_Task,//ä»»åŠ¡å‡½æ•°
+  taskENTER_CRITICAL();//½øÈëÁÙ½çÇø
+  LED_Task_Handle=xTaskCreateStatic((TaskFunction_t )LED_Task,//ÈÎÎñº¯Êı
                                     (const char*)"LED_Task",//
                                     (uint32_t   )128,//
-                                    (void*      )NULL,//ä¼ é€’ç»™ä»»åŠ¡çš„å‚æ•°
-                                    (UBaseType_t)4,//ä»»åŠ¡ä¼˜å…ˆçº§
-                                    (StackType_t*)LED_Task_Stack,//ä»»åŠ¡å †æ ˆ
-                                    (StaticTask_t*)&LED_Task_TCB);//ä»»åŠ¡æ§åˆ¶å—
+                                    (void*      )NULL,//´«µİ¸øÈÎÎñµÄ²ÎÊı
+                                    (UBaseType_t)4,//ÈÎÎñÓÅÏÈ¼¶
+                                    (StackType_t*)LED_Task_Stack,//ÈÎÎñ¶ÑÕ»
+                                    (StaticTask_t*)&LED_Task_TCB);//ÈÎÎñ¿ØÖÆ¿é
   if(NULL!=LED_Task_Handle)
-    printf("LED_Task_Handleä»»åŠ¡åˆ›å»ºæˆåŠŸ");
+    printf("LED_Task_HandleÈÎÎñ´´½¨³É¹¦\r\n");
   else
-    printf("LED_Task_Handleä»»åŠ¡åˆ›å»ºå¤±è´¥");
+    printf("LED_Task_HandleÈÎÎñ´´½¨Ê§°Ü\r\n");
   
-  vTaskDelete(AppTaskCreate_Handle);//åˆ é™¤AppTaskCreate_Handleä»»åŠ¡
-  taskEXIT_CRITICAL();//é€€å‡ºä¸´ç•ŒåŒº
+  vTaskDelete(AppTaskCreate_Handle);//É¾³ıAppTaskCreate_HandleÈÎÎñ
+  taskEXIT_CRITICAL();//ÍË³öÁÙ½çÇø
 
 }
 int main(void)
 {	
-  BSP_init();/*å¼€å‘æ¿ç¡¬ä»¶åˆå§‹åŒ–*/
-  printf("è¿™æ˜¯ä¸€ä¸ªåŸºäºSTM32F103çš„FreeRTOSç³»ç»Ÿçš„é™æ€åˆ›å»ºä»»åŠ¡çš„æµ‹è¯•!\r\n");
-  /*åˆ›å»ºAppTaskCreateä»»åŠ¡*/
+  BSP_init();/*¿ª·¢°åÓ²¼ş³õÊ¼»¯*/
+  printf("ÕâÊÇÒ»¸ö»ùÓÚSTM32F103µÄFreeRTOSÏµÍ³µÄ¾²Ì¬´´½¨ÈÎÎñµÄ²âÊÔ!\r\n");
+  /*´´½¨AppTaskCreateÈÎÎñ*/
   AppTaskCreate_Handle=xTaskCreateStatic((TaskFunction_t)AppTaskCreate,
-                                      (const char*   )"AppTaskCreate",//ä»»åŠ¡åç§°
-                                      (uint32_t      )128,//ä»»åŠ¡å †æ ˆå¤§å°
-                                      (void*         )NULL,//ä¼ é€’ç»™ä»»åŠ¡å‡½æ•°çš„å‚æ•°
-                                      (UBaseType_t   )3,//ä»»åŠ¡ä¼˜å…ˆçº§
+                                      (const char*   )"AppTaskCreate",//ÈÎÎñÃû³Æ
+                                      (uint32_t      )128,//ÈÎÎñ¶ÑÕ»´óĞ¡
+                                      (void*         )NULL,//´«µİ¸øÈÎÎñº¯ÊıµÄ²ÎÊı
+                                      (UBaseType_t   )3,//ÈÎÎñÓÅÏÈ¼¶
                                       (StackType_t*  )AppTaskCreate_Stack,
                                       (StaticTask_t*)&AppTaskCreate_TCB);  
-if(NULL!=AppTaskCreate_Handle)/*åˆ›å»ºæˆåŠŸ*/
-    vTaskStartScheduler();/*å¯åŠ¨ä»»åŠ¡ï¼Œå¼€å¯è°ƒåº¦*/
+if(NULL!=AppTaskCreate_Handle)/*´´½¨³É¹¦*/
+    vTaskStartScheduler();/*Æô¶¯ÈÎÎñ£¬¿ªÆôµ÷¶È*/
 
 
 

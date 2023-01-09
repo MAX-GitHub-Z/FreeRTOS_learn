@@ -171,5 +171,9 @@ void SysTick_Handler(void)
   * @}
   */ 
 
+void DEBUG_USART_IRQHandler()
+{
 
+
+}
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

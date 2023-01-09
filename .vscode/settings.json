@@ -1,0 +1,6 @@
+{
+    "idf.flashType": "UART",
+    "files.associations": {
+        "bsp_usart.h": "c"
+    }
+}
