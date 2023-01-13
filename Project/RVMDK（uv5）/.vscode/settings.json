@@ -1,8 +1,6 @@
 {
-    "idf.flashType": "UART",
     "files.associations": {
         "bsp_usart.h": "c",
-        "bsp_led.h": "c",
         "bsp_key.h": "c"
     }
 }

@@ -170,10 +170,34 @@ void SysTick_Handler(void)
 /**
   * @}
   */ 
-
+//#include "bsp_usart.h"
+//uint8_t ucTemp,USART_Buffer[USART_RX_buffer],i=0;
+//extern uint8_t usart_buffer[USART_RX_buffer];
 void DEBUG_USART_IRQHandler()
-{
-
-
+{/*
+if(USART_GetITStatus(DEBUG_USARTx,USART_IT_RXNE)!=RESET)
+	{		
+		ucTemp = USART_ReceiveData(DEBUG_USARTx);
+		USART_Buffer[i]=ucTemp;			
+    USART_SendData(DEBUG_USARTx,ucTemp);  
+		i++;
+	}	 
+		if(USART_Buffer[i-1]==0x0a)
+		{
+			//接收到换行符号
+			if(USART_Buffer[i-2]==0x0d)//判断是否接收到回车符号
+			{
+				printf("数据接收成功！\r\n");//数据接收成功
+				for(i=0;i<=USART_RX_buffer;i++)
+				{
+					usart_buffer[i]=USART_Buffer[i];
+					
+					//printf("数据=%d",USART_buffer[i]);
+				}
+			//	printf("\r\n");
+			}
+			i=0;
+		}
+*/
 }
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

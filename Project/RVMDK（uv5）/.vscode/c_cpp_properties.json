@@ -10,6 +10,7 @@
                 "e:\\freertos\\FreeRTOS_learn\\FreeRTOS_STM32F103\\FreeRTOS_Prget\\FreeRTOS\\port\\RVDS\\ARM_CM3",
                 "e:\\freertos\\FreeRTOS_learn\\FreeRTOS_STM32F103\\FreeRTOS_Prget\\User\\bsp\\led",
                 "e:\\freertos\\FreeRTOS_learn\\FreeRTOS_STM32F103\\FreeRTOS_Prget\\User\\bsp\\usart",
+                "e:\\freertos\\FreeRTOS_learn\\FreeRTOS_STM32F103\\FreeRTOS_Prget\\User\\bsp\\Key",
                 "E:\\keil5\\ARM\\ARMCC\\include",
                 "E:\\keil5\\ARM\\ARMCC\\include\\rw",
                 "e:\\freertos\\FreeRTOS_learn\\FreeRTOS_STM32F103\\FreeRTOS_Prget\\Libraries\\CMSIS\\startup",
