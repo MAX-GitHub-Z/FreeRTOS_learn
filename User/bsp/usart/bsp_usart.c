@@ -23,6 +23,24 @@
   * @param  无
   * @retval 无
   */
+ static void NVIC_Configuration(void)
+{
+  NVIC_InitTypeDef NVIC_InitStructure;
+  
+  /* 嵌套向量中断控制器组选择 */
+  //NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+  
+  /* 配置USART为中断源 */
+  NVIC_InitStructure.NVIC_IRQChannel = DEBUG_USART_IRQ;
+  /* 抢断优先级*/
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 6;
+  /* 子优先级 */
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  /* 使能中断 */
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  /* 初始化配置NVIC */
+  NVIC_Init(&NVIC_InitStructure);
+}
 void USART_Config(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -61,7 +79,10 @@ void USART_Config(void)
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	// 完成串口的初始化配置
 	USART_Init(DEBUG_USARTx, &USART_InitStructure);	
-	
+	/*配置串口接收中断*/
+	NVIC_Configuration();
+	USART_ITConfig(DEBUG_USARTx,USART_IT_RXNE,ENABLE);//启用检测串口接收数据线是否为空中断
+	USART_ITConfig(DEBUG_USARTx,USART_IT_IDLE,ENABLE);//启用检测串口空闲中断
 	// 使能串口
 	USART_Cmd(DEBUG_USARTx, ENABLE);	    
 }

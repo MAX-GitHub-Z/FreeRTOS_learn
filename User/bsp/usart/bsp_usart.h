@@ -5,8 +5,8 @@
 #include "stm32f10x.h"
 #include <stdio.h>
 
-#define USART_RX_buffer  20//定义串口接收缓存
 
+#define USART_RBUFF_SIZE  20 /*接收数据标志位*/
 
 /** 
   * 串口宏定义，不同的串口挂载的总线和IO不一样，移植时需要修改这几个宏

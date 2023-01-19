@@ -170,34 +170,29 @@ void SysTick_Handler(void)
 /**
   * @}
   */ 
-//#include "bsp_usart.h"
-//uint8_t ucTemp,USART_Buffer[USART_RX_buffer],i=0;
-//extern uint8_t usart_buffer[USART_RX_buffer];
+ 
+uint8_t usart_rx=0;
+extern char Usart_Rx_Buf[USART_RBUFF_SIZE];//串口接收数据数组
 void DEBUG_USART_IRQHandler()
-{/*
-if(USART_GetITStatus(DEBUG_USARTx,USART_IT_RXNE)!=RESET)
-	{		
-		ucTemp = USART_ReceiveData(DEBUG_USARTx);
-		USART_Buffer[i]=ucTemp;			
-    USART_SendData(DEBUG_USARTx,ucTemp);  
-		i++;
-	}	 
-		if(USART_Buffer[i-1]==0x0a)
-		{
-			//接收到换行符号
-			if(USART_Buffer[i-2]==0x0d)//判断是否接收到回车符号
-			{
-				printf("数据接收成功！\r\n");//数据接收成功
-				for(i=0;i<=USART_RX_buffer;i++)
-				{
-					usart_buffer[i]=USART_Buffer[i];
-					
-					//printf("数据=%d",USART_buffer[i]);
-				}
-			//	printf("\r\n");
-			}
-			i=0;
-		}
-*/
+{
+	uint8_t data;//接收数据暂存变量
+  UBaseType_t uxUSART_Intterupt;//中断临界区暂存值
+  uxUSART_Intterupt=taskENTER_CRITICAL_FROM_ISR();//进入临界区
+  //BaseType_t xHigherPriorityTaskWorken;
+  if(USART_GetITStatus(DEBUG_USARTx,USART_IT_RXNE)!=RESET)
+  {
+    data=USART_ReceiveData(DEBUG_USARTx);
+    //USART_SendData(DEBUG_USARTx,data);
+    Usart_Rx_Buf[usart_rx]=data;
+    usart_rx++;
+    USART_ClearITPendingBit(USART1,USART_IT_RXNE);//清空中断标志位
+  }
+ taskEXIT_CRITICAL_FROM_ISR(uxUSART_Intterupt);//退出临界区
+  if(USART_GetITStatus(DEBUG_USARTx,USART_IT_IDLE)!=RESET)//空闲中断
+  {
+    
+    data=DEBUG_USARTx->SR;//串口空闲中断的中断标志只能通过先读SR寄存器，再读DR寄存器清除！
+    data=DEBUG_USARTx->DR;
+  }
 }
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
